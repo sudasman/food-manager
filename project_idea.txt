@@ -1,0 +1,5 @@
+Make a web app that takes user input which consists of ingredients
+Store the user inputs(ingredients) in a database
+Use a lookup to find the recipes I can make using these ingredients
+Add a feature that allows me to add recipes 
+Also tell the user the ingredients im missing if I want to make a specific recipe
