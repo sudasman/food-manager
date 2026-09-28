@@ -14,5 +14,5 @@ use uuid::Uuid;
 use askama::Template;
 
 pub async fn new () {
-
+    let router = Router::new().route("/");
 }
