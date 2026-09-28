@@ -23,18 +23,19 @@ struct recipe_format{
     time: String,
 }
 
+
+
 pub async fn new () -> Result<(), sqlx::Error>{
-    let router = Router::new().route("/", get(get_demo));
 
+    let connection = SqliteConnectOptions::from_str("sqlite://sqlite.db")?.create_if_missing(true);
+    let pool = SqlitePool::connect_with(connection).await?;
+
+    let router = Router::new().route("/", get(get_demo)).with_state(pool);
     let address: String = String::from("0.0.0.0:3000");
-
     let listener: TcpListener = TcpListener::bind(address)
     .await
     .expect("Couldn't bind to address");
 
-    let connection = SqliteConnectOptions::from_str("sqlite://sqlite.db")?.create_if_missing(true);
-    
-    let pool = SqlitePool::connect_with(connection).await?;
 
     axum::serve(listener, router)
     .await
