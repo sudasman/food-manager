@@ -12,6 +12,8 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use tokio::net::TcpListener;
 use uuid::Uuid;
 use askama::Template;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePool};
+use std::str::FromStr;
 
 //template
 struct recipe_format{
@@ -21,7 +23,7 @@ struct recipe_format{
     time: String,
 }
 
-pub async fn new () {
+pub async fn new () -> Result<(), sqlx::Error>{
     let router = Router::new().route("/", get(get_demo));
 
     let address: String = String::from("0.0.0.0:3000");
@@ -30,9 +32,15 @@ pub async fn new () {
     .await
     .expect("Couldn't bind to address");
 
+    let connection = SqliteConnectOptions::from_str("sqlite://sqlite.db")?.create_if_missing(true);
+    
+    let pool = SqlitePool::connect_with(connection).await?;
+
     axum::serve(listener, router)
     .await
     .expect("Unable to start web server");
+
+    Ok(())
 }
 
 pub async fn get_demo(){}
