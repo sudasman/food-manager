@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home</title>
+    </head>
+    <body>
+        <div class="">
+            <h1 class="">Ingredients</h1>
+            <ul class="">
+                {% for ingredient in ingredients%}
+                <li> {{ingredient}} </li>
+                {% endfor %}
+
+                {% for seasoning in seasonings%}
+                <li> {{seasoning}} </li>
+                {% endfor %}
+
+                {% for cooking_tool in cooking_tools%}
+                <li> {{cooking_tool}} </li>
+                {% endfor %}
+
+                <h1 class=""> {{cooking_time}}</h1>
+        </div>
+    </body>
+</html>
