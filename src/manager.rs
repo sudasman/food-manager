@@ -33,6 +33,7 @@ struct RecipeFormat {
     cooking_time: i32, 
 }
 
+//FromRow allows the sqlx to deserialize the table into a rust struct
 #[derive(Debug, FromRow)]
 struct Recipe {
     id: String,
@@ -40,8 +41,10 @@ struct Recipe {
     cooking_time: i32,
 }
 
+//Use new types to avoid rust's orphan rule (Can't implment exterior trait for exterior type)
 struct AppError(sqlx::Error);
 
+//Makes sure my error implements intoresponse so the router doesn't throw an error
 impl IntoResponse for AppError{
     fn into_response(self) -> Response{
         (
@@ -82,6 +85,7 @@ pub async fn new() -> Result<(), sqlx::Error> {
 }
 
 pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
+    //Creating the tables that will later be filled with data
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS recipes (
@@ -142,10 +146,12 @@ pub async fn get_database(
     )
     .fetch_all(&recipe_database)
     .await
+    //IMPORTANT! The error is mapped to an error that implements intoresponse 
     .map_err(AppError)?;
 
     let mut recipe_list: Vec<RecipeFormat> = Vec::new();
 
+    //Dear future Eason, notice the type annotations of each
     for recipe in recipes {
         let ingredients: Vec<String> = sqlx::query_scalar::<_, String>(
             r#"
@@ -208,23 +214,3 @@ pub async fn post_database() {}
 pub async fn delete_database() {}
 
 pub async fn put_database() {}
-
-// sqlx ::query(
-//         "CREATE TABLE IF NOT EXISTS users (
-//             id INTEGER PRIMARY KEY AUTOINCREMENT,
-//             name TEXT NOT NULL
-//         );"
-//     )
-//     .execute(&pool)
-//     .await?;
-
-//     sqlx::query("INSERT INTO users (name) VALUES (?)")
-//     .bind("Bob")
-//     .execute(&pool)
-//     .await?;
-
-// let user: test = sqlx::query_as::<_, test>("SELECT id, name FROM users WHERE name = ?")
-//         .bind("Bob")
-//         .fetch_one(&pool)
-//         .await?;
-//     dbg!(user);
