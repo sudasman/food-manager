@@ -40,6 +40,16 @@ struct Recipe {
     cooking_time: i32,
 }
 
+struct AppError(sqlx::Error);
+
+impl IntoResponse for AppError{
+    fn into_response(self) -> Response{
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Database Error",
+        ).into_response()
+    }
+}
 //The backend will recieve information from the frontend using forms
 //The backend will store such information inside a database
 //When the program loads up, the saved data from the database should be visualized in the frontend
@@ -78,7 +88,7 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
         --in minutes
-        cooking_time INTEGER NOT NULL,
+        cooking_time INTEGER NOT NULL
         );
         
         CREATE TABLE IF NOT EXISTS ingredients (
@@ -122,16 +132,17 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
 
 pub async fn get_database(
     State(recipe_database): State<SqlitePool>,
-) -> Result<Html<String>, sqlx::Error> {
+) -> Result<Html<String>, AppError> {
     //Note: Recipe {id, recipe_name}
     let recipes: Vec<Recipe> = sqlx::query_as::<_, Recipe>(
         r#"
-        SELECT id, name
+        SELECT id, name, cooking_time
         FROM recipes
         "#,
     )
     .fetch_all(&recipe_database)
-    .await?;
+    .await
+    .map_err(AppError)?;
 
     let mut recipe_list: Vec<RecipeFormat> = Vec::new();
 
@@ -145,7 +156,8 @@ pub async fn get_database(
         )
         .bind(&recipe.id)
         .fetch_all(&recipe_database)
-        .await?;
+        .await
+        .map_err(AppError)?;
 
         let seasonings: Vec<String> = sqlx::query_scalar::<_, String>(
             r#"
@@ -156,7 +168,8 @@ pub async fn get_database(
         )
         .bind(&recipe.id)
         .fetch_all(&recipe_database)
-        .await?;
+        .await
+        .map_err(AppError)?;
 
         let cooking_tools: Vec<String> = sqlx::query_scalar::<_, String>(
             r#"
@@ -167,7 +180,8 @@ pub async fn get_database(
         )
         .bind(&recipe.id)
         .fetch_all(&recipe_database)
-        .await?;
+        .await
+        .map_err(AppError)?;
 
         recipe_list.push(RecipeFormat {
             recipe_name: recipe.recipe_name,
@@ -186,7 +200,7 @@ pub async fn get_database(
         return Ok(Html(res));
     }
     //dummy return value
-    Err(sqlx::Error::RowNotFound)
+    Err(AppError(sqlx::Error::RowNotFound))
 }
 
 pub async fn post_database() {}
