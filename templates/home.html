@@ -4,22 +4,29 @@
         <title>Home</title>
     </head>
     <body>
-        <div class="">
-            <h1 class="">Ingredients</h1>
-            <ul class="">
-                {% for ingredient in ingredients%}
-                <li> {{ingredient}} </li>
+        {% for recipe in recipes %}
+        <div>
+            <h1> {{recipe.recipe_name}} </h1>
+            <h1> Ingredients! </h1>
+            <ul>
+                {% for ingredient in recipe.ingredients %}
+                    <li> {{ingredient}} </li>
                 {% endfor %}
-
-                {% for seasoning in seasonings%}
-                <li> {{seasoning}} </li>
+            </ul>
+            <h1> Seasonings! </h1>
+            <ul>
+                {% for seasoning in recipe.seasonings %}
+                    <li> {{seasoning}} </li>
                 {% endfor %}
-
-                {% for cooking_tool in cooking_tools%}
-                <li> {{cooking_tool}} </li>
+            </ul>
+            <h1> Cooking Tools! </h1>
+            <ul>
+                {% for cooking_tool in recipe.cooking_tools %}
+                    <li> {{cooking_tool}} </li>
                 {% endfor %}
-
-                <h1 class=""> {{cooking_time}}</h1>
+            </ul>
+            <h1> The time it takes to finish cooking this: {{recipe.cooking_time}} </h1>
         </div>
+        {% endfor %}
     </body>
 </html>
