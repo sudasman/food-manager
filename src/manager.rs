@@ -20,26 +20,28 @@ use uuid::Uuid;
 
 #[derive(Debug, Template)]
 #[template(path = "home.html")]
-struct DisplayRecipes{
+struct DisplayRecipes {
     recipes: Vec<RecipeFormat>,
 }
 
-struct RecipeFormat{
+#[derive(Debug)]
+struct RecipeFormat {
     recipe_name: String,
     ingredients: Vec<String>,
     seasonings: Vec<String>,
     cooking_tools: Vec<String>,
-    cooking_time: String,
+    cooking_time: i32, 
 }
 
 #[derive(Debug, FromRow)]
 struct Recipe {
     id: String,
     recipe_name: String,
+    cooking_time: i32,
 }
 
 //The backend will recieve information from the frontend using forms
-//The backend will store such information inside a database 
+//The backend will store such information inside a database
 //When the program loads up, the saved data from the database should be visualized in the frontend
 
 pub async fn new() -> Result<(), sqlx::Error> {
@@ -75,6 +77,8 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         CREATE TABLE IF NOT EXISTS recipes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
+        --in minutes
+        cooking_time INTEGER NOT NULL,
         );
         
         CREATE TABLE IF NOT EXISTS ingredients (
@@ -119,23 +123,70 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
 pub async fn get_database(
     State(recipe_database): State<SqlitePool>,
 ) -> Result<Html<String>, sqlx::Error> {
-    let mut ingredients: Vec<String> = Vec::new();
-    let mut seasonings: Vec<String> = Vec::new();
-    let mut cooking_tools: Vec<String> = Vec::new();
-    let cooking_time: String = String::new();
+    //Note: Recipe {id, recipe_name}
+    let recipes: Vec<Recipe> = sqlx::query_as::<_, Recipe>(
+        r#"
+        SELECT id, name
+        FROM recipes
+        "#,
+    )
+    .fetch_all(&recipe_database)
+    .await?;
 
-    let page = RecipeFormat {
-        recipe_name: 
-        ingredients: ingredients,
-        seasonings: seasonings,
-        cooking_tools: cooking_tools,
-        cooking_time: cooking_time,
+    let mut recipe_list: Vec<RecipeFormat> = Vec::new();
+
+    for recipe in recipes {
+        let ingredients: Vec<String> = sqlx::query_scalar::<_, String>(
+            r#"
+            SELECT name
+            FROM ingredients
+            WHERE recipe_id = ?
+            "#,
+        )
+        .bind(&recipe.id)
+        .fetch_all(&recipe_database)
+        .await?;
+
+        let seasonings: Vec<String> = sqlx::query_scalar::<_, String>(
+            r#"
+            SELECT name 
+            FROM seasonings
+            WHERE recipe_id = ?
+            "#,
+        )
+        .bind(&recipe.id)
+        .fetch_all(&recipe_database)
+        .await?;
+
+        let cooking_tools: Vec<String> = sqlx::query_scalar::<_, String>(
+            r#"
+            SELECT name
+            FROM cooking_tools
+            WHERE recipe_id = ?
+            "#,
+        )
+        .bind(&recipe.id)
+        .fetch_all(&recipe_database)
+        .await?;
+
+        recipe_list.push(RecipeFormat {
+            recipe_name: recipe.recipe_name,
+            ingredients: ingredients,
+            seasonings: seasonings,
+            cooking_tools: cooking_tools,
+            cooking_time: recipe.cooking_time,
+        });
+    }
+
+    let page = DisplayRecipes {
+        recipes: recipe_list,
     };
-
 
     if let axum::response::Html(Ok(res)) = Html(page.render()) {
         return Ok(Html(res));
     }
+    //dummy return value
+    Err(sqlx::Error::RowNotFound)
 }
 
 pub async fn post_database() {}
