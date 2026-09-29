@@ -4,6 +4,11 @@
         <title>Home</title>
     </head>
     <body>
+        <form method="post" action="/"">
+            <input type="text">
+            <button type="submit"> Submit </button>
+        </form>
+
         {% for recipe in recipes %}
         <div>
             <h1> {{recipe.recipe_name}} </h1>
