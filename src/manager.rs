@@ -20,7 +20,12 @@ use uuid::Uuid;
 
 #[derive(Debug, Template)]
 #[template(path = "home.html")]
-struct RecipeFormat {
+struct DisplayRecipes{
+    recipes: Vec<RecipeFormat>,
+}
+
+struct RecipeFormat{
+    recipe_name: String,
     ingredients: Vec<String>,
     seasonings: Vec<String>,
     cooking_tools: Vec<String>,
@@ -29,13 +34,13 @@ struct RecipeFormat {
 
 #[derive(Debug, FromRow)]
 struct Recipe {
+    id: String,
     recipe_name: String,
-    description: RecipeFormat,
 }
 
-//the frontend will recieve info through forms that uses the method "Post"
-//Once post is invoked, the input will be incremented into the vectors
-//THe values in the vectors will then to put into the database 1 by 1
+//The backend will recieve information from the frontend using forms
+//The backend will store such information inside a database 
+//When the program loads up, the saved data from the database should be visualized in the frontend
 
 pub async fn new() -> Result<(), sqlx::Error> {
     let connection = SqliteConnectOptions::from_str("sqlite://sqlite.db")?.create_if_missing(true);
@@ -55,7 +60,7 @@ pub async fn new() -> Result<(), sqlx::Error> {
         .await
         .expect("Couldn't bind to address");
 
-    create_recipe_table(&pool);
+    create_recipe_table(&pool).await;
 
     axum::serve(listener, router)
         .await
@@ -66,14 +71,44 @@ pub async fn new() -> Result<(), sqlx::Error> {
 
 pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "CREATE TABLE IF NOT EXISTS recipes(
-            id PRIMARY KEY AUTOINCREMENT,
-            Recipe Name TEXT NOT NULL,
-            Ingredients TEXT NOT NULL,
-            Seasonings TEXT NOT NULL,
-            Cooking Tools TEXT NOT NULL,
-            Cooking Time TEXT NOT NULL,
-        );",
+        r#"
+        CREATE TABLE IF NOT EXISTS recipes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        );
+        
+        CREATE TABLE IF NOT EXISTS ingredients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipe_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+
+            --The foreign key maps to a primary key in the recipes table 
+            FOREIGN KEY (recipe_id)
+                REFERENCES recipes(id)
+                --deletes all children if parent is deleted
+                ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS seasonings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipe_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+
+            FOREIGN KEY (recipe_id)
+                REFERENCES recipes(id)
+                ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS cooking_tools (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipe_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+
+            FOREIGN KEY (recipe_id)
+                REFERENCES recipes(id)
+                ON DELETE CASCADE
+        )
+        "#,
     )
     .execute(pool)
     .await?;
@@ -90,17 +125,17 @@ pub async fn get_database(
     let cooking_time: String = String::new();
 
     let page = RecipeFormat {
+        recipe_name: 
         ingredients: ingredients,
         seasonings: seasonings,
         cooking_tools: cooking_tools,
         cooking_time: cooking_time,
     };
 
+
     if let axum::response::Html(Ok(res)) = Html(page.render()) {
         return Ok(Html(res));
     }
-
-    Err(sqlx::Error::Io)
 }
 
 pub async fn post_database() {}
