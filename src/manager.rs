@@ -269,7 +269,31 @@ pub async fn post_database
     }
 
     for seasoning in received_recipe.seasonings{
-        
+        sqlx::query(
+            r#"
+            INSERT INTO seasonings (recipe_id, seasoning_name)
+            VALUES (?, ?)
+            "#
+        )
+        .bind(foreign_key)
+        .bind(seasoning)
+        .execute(&recipe_database)
+        .await
+        .map_err(AppError)?;
+    }
+
+    for cooking_tool in received_recipe.cooking_tools{
+        sqlx::query(
+            r#"
+            INSERT INTO cooking_tools (recipe_id, cooking_tool_name)
+            VALUES (?, ?)
+            "#
+        )
+        .bind(foreign_key)
+        .bind(cooking_tool)
+        .execute(&recipe_database)
+        .await
+        .map_err(AppError)?;
     }
 
     Ok(Redirect::to("/"))
