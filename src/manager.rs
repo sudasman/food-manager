@@ -3,7 +3,7 @@ use axum::{
     Json, Router,
     extract::{Path, State},
     http::StatusCode,
-    response::{Html, IntoResponse, Response, Redirect},
+    response::{Html, IntoResponse, Redirect, Response},
     routing::get,
 };
 //Form from axum_extra allows forms to return a sequence (vec) and preserves the orignial capabilities of axum::extract::Form
@@ -31,7 +31,7 @@ struct RecipeFormat {
     ingredients: Vec<String>,
     seasonings: Vec<String>,
     cooking_tools: Vec<String>,
-    cooking_time: i32, 
+    cooking_time: i32,
 }
 
 #[derive(Debug, Deserialize)]
@@ -55,12 +55,9 @@ struct Recipe {
 struct AppError(sqlx::Error);
 
 //Makes sure my error implements intoresponse so the router doesn't throw an error
-impl IntoResponse for AppError{
-    fn into_response(self) -> Response{
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Database Error",
-        ).into_response()
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("Database Error: {:?}", self.0)).into_response()
     }
 }
 //The backend will recieve information from the frontend using forms
@@ -85,7 +82,9 @@ pub async fn new() -> Result<(), sqlx::Error> {
         .await
         .expect("Couldn't bind to address");
 
-    create_recipe_table(&pool).await;
+    create_recipe_table(&pool)
+        .await
+        .expect("Failed to create tables");
 
     axum::serve(listener, router)
         .await
@@ -94,7 +93,7 @@ pub async fn new() -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn create_recipe_table(recipe_database: &SqlitePool) -> Result<(), sqlx::Error> {
     //Creating the tables that will later be filled with data
     sqlx::query(
         r#"
@@ -104,7 +103,13 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         --in minutes
         cooking_time INTEGER NOT NULL
         );
-        
+        "#,
+    )
+    .execute(recipe_database)
+    .await?;
+
+    sqlx::query(
+        r#"
         CREATE TABLE IF NOT EXISTS ingredients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER NOT NULL,
@@ -116,7 +121,13 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
                 --deletes all children if parent is deleted
                 ON DELETE CASCADE
         );
+        "#,
+    )
+    .execute(recipe_database)
+    .await?;
 
+    sqlx::query(
+        r#"
         CREATE TABLE IF NOT EXISTS seasonings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER NOT NULL,
@@ -126,7 +137,13 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
                 REFERENCES recipes(id)
                 ON DELETE CASCADE
         );
+        "#,
+    )
+    .execute(recipe_database)
+    .await?;
 
+    sqlx::query(
+        r#"
         CREATE TABLE IF NOT EXISTS cooking_tools (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER NOT NULL,
@@ -135,10 +152,10 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
             FOREIGN KEY (recipe_id)
                 REFERENCES recipes(id)
                 ON DELETE CASCADE
-        )
+        );
         "#,
     )
-    .execute(pool)
+    .execute(recipe_database)
     .await?;
 
     Ok(())
@@ -156,7 +173,7 @@ pub async fn get_database(
     )
     .fetch_all(&recipe_database)
     .await
-    //IMPORTANT! The error is mapped to an error that implements intoresponse 
+    //IMPORTANT! The error is mapped to an error that implements intoresponse
     .map_err(AppError)?;
 
     let mut recipe_list: Vec<RecipeFormat> = Vec::new();
@@ -219,17 +236,15 @@ pub async fn get_database(
     Err(AppError(sqlx::Error::RowNotFound))
 }
 
-pub async fn post_database
-(
+pub async fn post_database(
     State(recipe_database): State<SqlitePool>,
-    Form(received_recipe): Form<RecipeForm>, 
-) -> Result<Redirect, AppError> {  
-
+    Form(received_recipe): Form<RecipeForm>,
+) -> Result<Redirect, AppError> {
     sqlx::query(
         r#"
         INSERT INTO recipes (recipe_name, cooking_time)
         VALUES (?, ?)
-        "#
+        "#,
     )
     .bind(received_recipe.recipe_name)
     .bind(received_recipe.cooking_time)
@@ -241,25 +256,25 @@ pub async fn post_database
     //REQUIRED: Type Annotation
     //Every expression needs to have a known type at compile time
     //query_scalar -> Extracts first column of each row
-    let foreign_key : i64 = sqlx::query_scalar(
-            r#"
+    let foreign_key: i64 = sqlx::query_scalar(
+        r#"
             --gets the first key in descending order
             --DESC -> descending order
             --LIMIT 1 -> only get first row
             SELECT id FROM recipes ORDER BY id DESC LIMIT 1
-            "#
-        )
-        //fetch_one gets 1 row rather than getting all rows (fetch_all)
-        .fetch_one(&recipe_database)
-        .await
-        .map_err(AppError)?;
+            "#,
+    )
+    //fetch_one gets 1 row rather than getting all rows (fetch_all)
+    .fetch_one(&recipe_database)
+    .await
+    .map_err(AppError)?;
 
-    for ingredient in received_recipe.ingredients{
+    for ingredient in received_recipe.ingredients {
         sqlx::query(
             r#"
             INSERT INTO ingredients (recipe_id, ingredient_name)
             VALUES (?, ?)
-            "#
+            "#,
         )
         .bind(foreign_key)
         .bind(ingredient)
@@ -268,12 +283,12 @@ pub async fn post_database
         .map_err(AppError)?;
     }
 
-    for seasoning in received_recipe.seasonings{
+    for seasoning in received_recipe.seasonings {
         sqlx::query(
             r#"
             INSERT INTO seasonings (recipe_id, seasoning_name)
             VALUES (?, ?)
-            "#
+            "#,
         )
         .bind(foreign_key)
         .bind(seasoning)
@@ -282,12 +297,12 @@ pub async fn post_database
         .map_err(AppError)?;
     }
 
-    for cooking_tool in received_recipe.cooking_tools{
+    for cooking_tool in received_recipe.cooking_tools {
         sqlx::query(
             r#"
             INSERT INTO cooking_tools (recipe_id, cooking_tool_name)
             VALUES (?, ?)
-            "#
+            "#,
         )
         .bind(foreign_key)
         .bind(cooking_tool)
