@@ -1,11 +1,13 @@
 use askama::Template;
 use axum::{
     Json, Router,
-    extract::{Path, State, Form},
+    extract::{Path, State},
     http::StatusCode,
     response::{Html, IntoResponse, Response},
     routing::get,
 };
+//Form from axum_extra allows forms to return a sequence (vec) and preserves the orignial capabilities of axum::extract::Form
+use axum_extra::extract::Form;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{
@@ -36,7 +38,7 @@ struct RecipeFormat {
 #[derive(Debug, Deserialize)]
 struct RecipeForm {
     recipe_name: String,
-    ingredients: Vec<String>,
+    ingredients: String,
     seasonings: Vec<String>,
     cooking_tools: Vec<String>,
     cooking_time: i32,
@@ -223,7 +225,8 @@ pub async fn post_database
 (
     State(recipe_database): State<SqlitePool>,
     Form(input_information): Form<RecipeForm>, 
-) -> Result<Html<String>, AppError> {    
+) -> Result<Html<String>, AppError> {  
+    dbg!(input_information.ingredients);
     Ok(Html("Added".into()))
 }
 
