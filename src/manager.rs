@@ -3,7 +3,7 @@ use axum::{
     Json, Router,
     extract::{Path, State},
     http::StatusCode,
-    response::{Html, IntoResponse, Response},
+    response::{Html, IntoResponse, Response, Redirect},
     routing::get,
 };
 //Form from axum_extra allows forms to return a sequence (vec) and preserves the orignial capabilities of axum::extract::Form
@@ -18,7 +18,6 @@ use std::fs::read_to_string;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex, MutexGuard};
 use tokio::net::TcpListener;
-use uuid::Uuid;
 
 #[derive(Debug, Template)]
 #[template(path = "home.html")]
@@ -225,9 +224,9 @@ pub async fn post_database
 (
     State(recipe_database): State<SqlitePool>,
     Form(input_information): Form<RecipeForm>, 
-) -> Result<Html<String>, AppError> {  
-    dbg!(input_information.ingredients);
-    Ok(Html("Added".into()))
+) -> Result<Redirect, AppError> {  
+
+    Ok(Redirect::to("/"))
 }
 
 pub async fn delete_database() {}
