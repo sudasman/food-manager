@@ -37,7 +37,7 @@ struct RecipeFormat {
 #[derive(Debug, Deserialize)]
 struct RecipeForm {
     recipe_name: String,
-    ingredients: String,
+    ingredients: Vec<String>,
     seasonings: Vec<String>,
     cooking_tools: Vec<String>,
     cooking_time: i32,
@@ -100,7 +100,7 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         r#"
         CREATE TABLE IF NOT EXISTS recipes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
+        recipe_name TEXT NOT NULL UNIQUE,
         --in minutes
         cooking_time INTEGER NOT NULL
         );
@@ -108,7 +108,7 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         CREATE TABLE IF NOT EXISTS ingredients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER NOT NULL,
-            name TEXT NOT NULL,
+            ingredient_name TEXT NOT NULL,
 
             --The foreign key maps to a primary key in the recipes table 
             FOREIGN KEY (recipe_id)
@@ -120,7 +120,7 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         CREATE TABLE IF NOT EXISTS seasonings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER NOT NULL,
-            name TEXT NOT NULL,
+            seasoning_name TEXT NOT NULL,
 
             FOREIGN KEY (recipe_id)
                 REFERENCES recipes(id)
@@ -130,7 +130,7 @@ pub async fn create_recipe_table(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         CREATE TABLE IF NOT EXISTS cooking_tools (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             recipe_id INTEGER NOT NULL,
-            name TEXT NOT NULL,
+            cooking_tool_name TEXT NOT NULL,
 
             FOREIGN KEY (recipe_id)
                 REFERENCES recipes(id)
@@ -150,7 +150,7 @@ pub async fn get_database(
     //Note: Recipe {id, recipe_name}
     let recipes: Vec<Recipe> = sqlx::query_as::<_, Recipe>(
         r#"
-        SELECT id, name, cooking_time
+        SELECT id, recipe_name, cooking_time
         FROM recipes
         "#,
     )
@@ -165,7 +165,7 @@ pub async fn get_database(
     for recipe in recipes {
         let ingredients: Vec<String> = sqlx::query_scalar::<_, String>(
             r#"
-            SELECT name
+            SELECT ingredient_name
             FROM ingredients
             WHERE recipe_id = ?
             "#,
@@ -177,7 +177,7 @@ pub async fn get_database(
 
         let seasonings: Vec<String> = sqlx::query_scalar::<_, String>(
             r#"
-            SELECT name 
+            SELECT seasoning_name 
             FROM seasonings
             WHERE recipe_id = ?
             "#,
@@ -189,7 +189,7 @@ pub async fn get_database(
 
         let cooking_tools: Vec<String> = sqlx::query_scalar::<_, String>(
             r#"
-            SELECT name
+            SELECT cooking_tool_name
             FROM cooking_tools
             WHERE recipe_id = ?
             "#,
@@ -225,7 +225,26 @@ pub async fn post_database
     Form(received_recipe): Form<RecipeForm>, 
 ) -> Result<Redirect, AppError> {  
 
-    //add functionality that inserts rows into table using Form(received_recipe)
+    sqlx::query(
+        r#"
+        INSERT INTO recipes (recipe_name, cooking_time)
+        VALUES (?, ?)
+        "#
+    )
+    .bind(received_recipe.recipe_name)
+    .bind(received_recipe.cooking_time)
+    .execute(&recipe_database)
+    .await
+    .map_err(AppError)?;
+    
+    for ingredient in received_recipe.ingredients{
+        sqlx::query(
+            r#"
+            INSERT INTO ingredients (ingredient_name)
+            "#
+        )
+    }
+
     Ok(Redirect::to("/"))
 }
 
