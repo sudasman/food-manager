@@ -1,7 +1,7 @@
 use askama::Template;
 use axum::{
     Json, Router,
-    extract::{Path, State},
+    extract::{Path, State, Form},
     http::StatusCode,
     response::{Html, IntoResponse, Response},
     routing::get,
@@ -33,10 +33,19 @@ struct RecipeFormat {
     cooking_time: i32, 
 }
 
+#[derive(Debug, Deserialize)]
+struct RecipeForm {
+    recipe_name: String,
+    ingredients: Vec<String>,
+    seasonings: Vec<String>,
+    cooking_tools: Vec<String>,
+    cooking_time: i32,
+}
+
 //FromRow allows the sqlx to deserialize the table into a rust struct
 #[derive(Debug, FromRow)]
 struct Recipe {
-    id: String,
+    id: i32,
     recipe_name: String,
     cooking_time: i32,
 }
@@ -209,7 +218,14 @@ pub async fn get_database(
     Err(AppError(sqlx::Error::RowNotFound))
 }
 
-pub async fn post_database() {}
+//have a form submit for each field in RecipeFormat
+pub async fn post_database
+(
+    State(recipe_database): State<SqlitePool>,
+    Form(input_information): Form<RecipeForm>, 
+) -> Result<Html<String>, AppError> {    
+    Ok(Html("Added".into()))
+}
 
 pub async fn delete_database() {}
 
