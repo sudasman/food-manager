@@ -236,13 +236,40 @@ pub async fn post_database
     .execute(&recipe_database)
     .await
     .map_err(AppError)?;
-    
+    //Note: execute is used if we dont need to read the row
+
+    //REQUIRED: Type Annotation
+    //Every expression needs to have a known type at compile time
+    //query_scalar -> Extracts first column of each row
+    let foreign_key : i64 = sqlx::query_scalar(
+            r#"
+            --gets the first key in descending order
+            --DESC -> descending order
+            --LIMIT 1 -> only get first row
+            SELECT id FROM recipes ORDER BY id DESC LIMIT 1
+            "#
+        )
+        //fetch_one gets 1 row rather than getting all rows (fetch_all)
+        .fetch_one(&recipe_database)
+        .await
+        .map_err(AppError)?;
+
     for ingredient in received_recipe.ingredients{
         sqlx::query(
             r#"
-            INSERT INTO ingredients (ingredient_name)
+            INSERT INTO ingredients (recipe_id, ingredient_name)
+            VALUES (?, ?)
             "#
         )
+        .bind(foreign_key)
+        .bind(ingredient)
+        .execute(&recipe_database)
+        .await
+        .map_err(AppError)?;
+    }
+
+    for seasoning in received_recipe.seasonings{
+        
     }
 
     Ok(Redirect::to("/"))
