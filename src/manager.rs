@@ -219,13 +219,13 @@ pub async fn get_database(
     Err(AppError(sqlx::Error::RowNotFound))
 }
 
-//have a form submit for each field in RecipeFormat
 pub async fn post_database
 (
     State(recipe_database): State<SqlitePool>,
-    Form(input_information): Form<RecipeForm>, 
+    Form(received_recipe): Form<RecipeForm>, 
 ) -> Result<Redirect, AppError> {  
 
+    //add functionality that inserts rows into table using Form(received_recipe)
     Ok(Redirect::to("/"))
 }
 
