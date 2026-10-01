@@ -256,7 +256,7 @@ pub async fn post_database(
     //REQUIRED: Type Annotation
     //Every expression needs to have a known type at compile time
     //query_scalar -> Extracts first column of each row
-    let foreign_key: i64 = sqlx::query_scalar(
+    let foreign_key: i32 = sqlx::query_scalar(
         r#"
             --gets the first key in descending order
             --DESC -> descending order
