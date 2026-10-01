@@ -1,0 +1,7 @@
+npm install tailwindcss @tailwindcss/cli
+create a folder to contain input.css
+add @import "tailwindcss"; to it
+run npx @tailwindcss/cli -i ./folder_name/input.css -o ./folder_name/output.css --watch
+cargo add tower_http --features full
+add .nest_service("/css", ServeDir::new("folder_name")); at the end of the route
+add to html <link rel="stylesheet" href="/css/output.css">
