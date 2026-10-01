@@ -14,6 +14,7 @@ use sqlx::{
     FromRow,
     sqlite::{SqliteConnectOptions, SqlitePool},
 };
+use tower_http::services::ServeDir;
 use std::fs::read_to_string;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -76,7 +77,8 @@ pub async fn new() -> Result<(), sqlx::Error> {
                 .delete(delete_database)
                 .put(put_database),
         )
-        .with_state(pool.clone());
+        .with_state(pool.clone())
+        .nest_service("/src", ServeDir::new("src"));;
     let address: String = String::from("0.0.0.0:3000");
     let listener: TcpListener = TcpListener::bind(address)
         .await
@@ -89,7 +91,6 @@ pub async fn new() -> Result<(), sqlx::Error> {
     axum::serve(listener, router)
         .await
         .expect("Unable to start web server");
-
     Ok(())
 }
 
