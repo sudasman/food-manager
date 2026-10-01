@@ -172,13 +172,4 @@
   .gap-2 {
     gap: calc(var(--spacing) * 2);
   }
-  .bg-red-500 {
-    background-color: var(--color-red-500);
-  }
-  .p-10 {
-    padding: calc(var(--spacing) * 10);
-  }
-  .text-white {
-    color: var(--color-white);
-  }
 }
