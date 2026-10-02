@@ -1,53 +1,70 @@
+<!-- npx @tailwindcss/cli -i ./css/input.css -o ./src/output.css --watch -->
+
 <!DOCTYPE html>
 <html>
-    <head>
-         <link rel="stylesheet" href="/src/output.css">
-        <title>Home</title>
-    </head>
 
-    <body>
-        <form method="post" class="flex gap-2">
-            <h1>Recipe Name</h1>
-            <input name="recipe_name" type="text">
-            <button type="submit"> Submit </button>
-            <h1>Ingredients</h1>
+<head>
+    <link rel="stylesheet" href="/src/output.css">
+    <title>Home</title>
+</head>
+
+<body>
+    <form method="post" class="flex gap-2 max-w-sm ms-auto">
+        <div class="mb-5">
+            <label class="block mb-2.5 text-sm font-medium">Recipe Name</label>
+            <input name="recipe_name" type="text" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body" placeholder="Salad" required>
+            <button type="submit" class=" border-2 border-blue-500 border-solid rounded-sm hover:bg-grey transition"> Submit </button>
+        </div>
+        <div>
+            <label class="block mb-2.5 text-sm font-medium">Ingredient</label>
             <!-- the name must match fields -->
             <input name="ingredients" type="text">
             <button type="submit"> Submit </button>
-            <h1>Seasonings</h1>
+        </div>
+        <div>
+            <label class="block mb-2.5 text-sm font-medium">Seasoning</label>
             <input name="seasonings" type="text">
             <button type="submit"> Submit </button>
-            <h1>Cooking Tools</h1>
+        </div>
+        <div>
+            <label class="block mb-2.5 text-sm font-medium">Cooking Tool</label>
             <input name="cooking_tools" type="text">
             <button type="submit"> Submit </button>
-            <h1>Cooking Time</h1>
+        </div>
+        <div>
+            <label class="block mb 2.5 text-sm font font-medium">Cooking Time</label>
             <input name="cooking_time" type="text">
             <button type="submit"> Submit </button>
-        </form>
+        </div>
 
+    </form>
+    <div class="flex items-end">
         {% for recipe in recipes %}
         <div>
             <h1> {{recipe.recipe_name}} </h1>
             <h1> Ingredients! </h1>
             <ul>
                 {% for ingredient in recipe.ingredients %}
-                    <li> {{ingredient}} </li>
+                <li> {{ingredient}} </li>
                 {% endfor %}
             </ul>
             <h1> Seasonings! </h1>
             <ul>
                 {% for seasoning in recipe.seasonings %}
-                    <li> {{seasoning}} </li>
+                <li> {{seasoning}} </li>
                 {% endfor %}
             </ul>
             <h1> Cooking Tools! </h1>
             <ul>
                 {% for cooking_tool in recipe.cooking_tools %}
-                    <li> {{cooking_tool}} </li>
+                <li> {{cooking_tool}} </li>
                 {% endfor %}
             </ul>
             <h1> The time it takes to finish cooking this: {{recipe.cooking_time}} </h1>
         </div>
         {% endfor %}
-    </body>
+    </div>
+</body>
+<script></script>
+
 </html>
