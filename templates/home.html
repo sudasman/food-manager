@@ -9,30 +9,30 @@
 </head>
 
 <body>
-    <form method="post" class="flex gap-2 max-w-sm ms-auto">
+    <form method="post" class="flex justify-start items-start gap-2 max-w-sm ms-auto">
         <div class="mb-5">
             <label class="block mb-2.5 text-sm font-medium">Recipe Name</label>
-            <input name="recipe_name" type="text" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body" placeholder="Salad" required>
-            <button type="submit" class=" border-2 border-blue-500 border-solid rounded-sm hover:bg-grey transition"> Submit </button>
+            <input name="recipe_name" type="text" class="border-2 border-blue-500 rounded-sm px-4 py-2 hover:bg-gray-200 transition" placeholder="Salad" required>
+            <button type="submit" class=" border-2 border-blue-500 border-solid rounded-sm transition"> Submit </button>
         </div>
-        <div>
+        <div class="mb-5">
             <label class="block mb-2.5 text-sm font-medium">Ingredient</label>
             <!-- the name must match fields -->
             <input name="ingredients" type="text">
             <button type="submit"> Submit </button>
         </div>
-        <div>
+        <div class="mb-5">
             <label class="block mb-2.5 text-sm font-medium">Seasoning</label>
             <input name="seasonings" type="text">
             <button type="submit"> Submit </button>
         </div>
-        <div>
+        <div class="mb-5">
             <label class="block mb-2.5 text-sm font-medium">Cooking Tool</label>
             <input name="cooking_tools" type="text">
             <button type="submit"> Submit </button>
         </div>
-        <div>
-            <label class="block mb 2.5 text-sm font font-medium">Cooking Time</label>
+        <div class="mb-5">
+            <label class="block mb-2.5 text-sm font-medium">Cooking Time</label>
             <input name="cooking_time" type="text">
             <button type="submit"> Submit </button>
         </div>

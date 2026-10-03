@@ -77,8 +77,8 @@ pub async fn new() -> Result<(), sqlx::Error> {
                 .delete(delete_database)
                 .put(put_database),
         )
-        .with_state(pool.clone())
-        .nest_service("/src", ServeDir::new("src"));;
+        .nest_service("/src", ServeDir::new("src"))
+        .with_state(pool.clone());
     let address: String = String::from("0.0.0.0:3000");
     let listener: TcpListener = TcpListener::bind(address)
         .await
