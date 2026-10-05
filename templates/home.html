@@ -37,7 +37,7 @@
 
             <div class="flex flex-row justify-start items-start gap-2 max-w-sm">
 
-                <div class="mb-5">
+                <div id="ingredients" class="mb-5">
                     <label class="block mb-2.5 text-sm font-medium">
                         Ingredient
                     </label>
@@ -51,7 +51,11 @@
                     >
                     <!--type="submit" refers to the form button-->
                     <!--Padding is for the content inside, margin is outside spacing-->
-                    <button type="button" class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
+                    <button 
+                        id="addIngredient"
+                        type="button" 
+                        onclick="addInputIngredients()"
+                        class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
                 </div>
 
                 <div class="mb-5">
@@ -66,7 +70,8 @@
                         placeholder="ex. Salt"
                         required
                     >
-                    <button type="button" class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
+                    <button type="button"
+                            class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
                 </div>
 
                 <div class="mb-5">
@@ -121,7 +126,7 @@
 
             {% for recipe in recipes %}
 
-            <div>
+            <div class="border-2 rounded-sm px-2 py-1">
 
                 <h1>Recipe Name</h1>
                 <h1>{{recipe.recipe_name}}</h1>
@@ -162,6 +167,19 @@
 
 </body>
 
-<script></script>
+<script>
+    function addInputIngredients() {
+        const input = document.createElement("input");
+
+        input.type = "text";
+        input.name = "ingredients";
+        input.placeholder = "es. Carrot";
+        input.className = "border-2 border-blue-500 mb-5 rounded-sm px-4 py-2 hover:bg-gray-200 transition";
+        
+        const button = document.getElementById("addIngredient")
+        //lets you specify exactly where it goes.
+        document.getElementById("ingredients").insertBefore(input, button);
+    }
+</script>
 
 </html>
