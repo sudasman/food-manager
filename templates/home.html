@@ -59,7 +59,7 @@
                         class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
                 </div>
 
-                <div class="mb-5">
+                <div id="seasonings" class="mb-5">
                     <label class="block mb-2.5 text-sm font-medium">
                         Seasoning
                     </label>
@@ -71,11 +71,16 @@
                         placeholder="ex. Salt"
                         required
                     >
-                    <button type="button"
-                            class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
+                    <button 
+                        id="addSeasoning"
+                        type="button"
+                        onclick="addInputSeasonings()"
+                        class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
                 </div>
 
-                <div class="mb-5">
+                <div 
+                id="cookingTools"
+                class="mb-5">
                     <label class="block mb-2.5 text-sm font-medium">
                         Cooking Tool
                     </label>
@@ -87,7 +92,11 @@
                         placeholder="ex. Spatula"
                         required
                     >
-                    <button type="button" class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
+                    <button 
+                    type="button" 
+                    id="addCookingTool"
+                    onclick="addInputCookingTools()"
+                    class="mb-5 border-2 rounded-sm px-2 py-1 hover:bg-green-300 hover:border-black transition duration-300">+ Add Ingredient</button>
                 </div>
 
             </div>
