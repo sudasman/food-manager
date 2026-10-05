@@ -6,6 +6,7 @@
 
 <head>
     <link rel="stylesheet" href="/src/output.css">
+    <script src="script.js"></script>
     <title>Home</title>
 </head>
 
@@ -45,7 +46,7 @@
                     <input
                         name="ingredients"
                         type="text"
-                        class="border-2 border-blue-500 mb-5 rounded-sm px-4 py-2 hover:bg-gray-200 transition"
+                        class="border-2 border-blue-500 mb-5 mr-5 rounded-sm px-4 py-2 hover:bg-gray-200 transition"
                         placeholder="ex. Carrot"
                         required
                     >
@@ -66,7 +67,7 @@
                     <input
                         name="seasonings"
                         type="text"
-                        class="mb-5 border-2 border-blue-500 rounded-sm px-4 py-2 hover:bg-gray-200 transition"
+                        class="mb-5 border-2 border-blue-500 mr-5 rounded-sm px-4 py-2 hover:bg-gray-200 transition"
                         placeholder="ex. Salt"
                         required
                     >
@@ -82,7 +83,7 @@
                     <input
                         name="cooking_tools"
                         type="text"
-                        class="mb-5 border-2 border-blue-500 rounded-sm px-4 py-2 hover:bg-gray-200 transition"
+                        class="mb-5 border-2 border-blue-500 mr-5 rounded-sm px-4 py-2 hover:bg-gray-200 transition"
                         placeholder="ex. Spatula"
                         required
                     >
@@ -166,20 +167,4 @@
     </div>
 
 </body>
-
-<script>
-    function addInputIngredients() {
-        const input = document.createElement("input");
-
-        input.type = "text";
-        input.name = "ingredients";
-        input.placeholder = "es. Carrot";
-        input.className = "border-2 border-blue-500 mb-5 rounded-sm px-4 py-2 hover:bg-gray-200 transition";
-        
-        const button = document.getElementById("addIngredient")
-        //lets you specify exactly where it goes.
-        document.getElementById("ingredients").insertBefore(input, button);
-    }
-</script>
-
 </html>
