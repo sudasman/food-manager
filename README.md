@@ -1,1 +1,1 @@
-web app for decision making
+web app for personal decision making and organization
